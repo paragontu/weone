@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WE·ONE (위원모아) | 전국 지자체·지방의회 민간위원 모집 통합 허브</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- Top Header -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-area">
+        <div class="brand-logo">WE·ONE</div>
+        <div class="brand-text">
+          <h1>전국 지자체·지방의회 민간위원 모집 통합 허브</h1>
+          <p>17개 광역시·도 · 226개 시·군·구 · 243개 광역·기초의회 (도의회·시의회·구의회·군의회) 실시간 수집</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="sync-meta-box">
+          <span class="pulse-dot" id="liveDot"></span>
+          <span id="lastSyncText">업데이트 확인 중...</span>
+          <select id="autoRefreshSelect" title="자동 업데이트 주기 설정">
+            <option value="15">15분마다 자동수집</option>
+            <option value="30" selected>30분마다 자동수집</option>
+            <option value="60">1시간마다 자동수집</option>
+            <option value="0">자동수집 끔</option>
+          </select>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btnSyncStandard" title="전국 핵심 키워드 및 새올 고시/공고 즉시 업데이트">
+            <span>🔄 실시간 통합 업데이트</span>
+          </button>
+          <button class="btn btn-council" id="btnSyncCouncil" title="전국 도의회·시의회·구의회·군의회 민간위원 공고 집중 수집">
+            <span>🏛️ 지방의회 집중 수집</span>
+          </button>
+          <button class="btn btn-secondary" id="btnSyncFull" title="전국 17개 시·도 전체 순회 정밀 수집">
+            <span>🗺️ 전국 17개 시도 정밀수집</span>
+          </button>
+          <button class="btn btn-outline" id="btnOpenManualModal" title="특정 지자체 고시/공고 URL 직접 등록">
+            <span>+ URL 직접 등록</span>
+          </button>
+          <button class="btn btn-outline" id="btnExportCsv" title="현재 필터링된 공고 목록을 CSV(엑셀)로 저장">
+            <span>📥 엑셀(CSV) 저장</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Sync Progress Bar -->
+    <div class="sync-progress-banner hidden" id="syncBanner">
+      <div class="sync-progress-info">
+        <span class="spinner"></span>
+        <strong id="syncStatusLabel">수집 중...</strong>
+        <span id="syncCountLabel">(0 / 0 단계)</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="syncProgressBar" style="width: 10%"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- KPI Summary Row -->
+    <section class="kpi-grid">
+      <div class="kpi-card active" data-QuickFilter="all" id="kpiAll">
+        <div class="kpi-label">현재 모집중 공고 (전체)</div>
+        <div class="kpi-value" id="valTotal">0</div>
+        <div class="kpi-sub">당일 기준 마감일 미경과 공고만 표시</div>
+      </div>
+      <div class="kpi-card" data-QuickFilter="today" id="kpiToday">
+        <div class="kpi-label">🔥 오늘(당일) 마감</div>
+        <div class="kpi-value text-rose" id="valToday">0</div>
+        <div class="kpi-sub">오늘 마감되는 공고 (D-Day)</div>
+      </div>
+      <div class="kpi-card" data-QuickFilter="urgent" id="kpiUrgent">
+        <div class="kpi-label">⏰ 마감 임박 (D-3 이내)</div>
+        <div class="kpi-value text-amber" id="valUrgent">0</div>
+        <div class="kpi-sub">오늘 포함 3일 이내 마감</div>
+      </div>
+      <div class="kpi-card" data-QuickFilter="council" id="kpiCouncil">
+        <div class="kpi-label">🏛️ 지방의회 민간위원</div>
+        <div class="kpi-value text-violet" id="valCouncil">0</div>
+        <div class="kpi-sub">도의회 · 시의회 · 구의회 · 군의회</div>
+      </div>
+      <div class="kpi-card" data-QuickFilter="recent" id="kpiRecent">
+        <div class="kpi-label">🆕 최근 3일 신규 등록</div>
+        <div class="kpi-value text-emerald" id="valRecent">0</div>
+        <div class="kpi-sub">최근 공고일 기준 신규 모집</div>
+      </div>
+      <div class="kpi-card" data-QuickFilter="bookmarked" id="kpiBookmarked">
+        <div class="kpi-label">⭐ 관심 · 지원관리</div>
+        <div class="kpi-value text-blue" id="valBookmarked">0</div>
+        <div class="kpi-sub">북마크 및 지원상태 지정 공고</div>
+      </div>
+    </section>
+
+    <!-- 17 Regions Selector Bar -->
+    <section class="panel-card region-panel">
+      <div class="panel-header-row">
+        <div class="panel-title">
+          <span>📍 지역별 탐색 (17개 광역시·도 및 산하 시·군·구·의회)</span>
+        </div>
+        <div class="region-actions">
+          <button class="btn-xs btn-tint" id="btnSyncSelectedRegion">현재 선택 지역 정밀 재수집</button>
+        </div>
+      </div>
+      <div class="region-tabs" id="regionTabs">
+        <!-- Populated by JS -->
+      </div>
+      <!-- Sub-region drilldown row (시·군·구 / 의회) -->
+      <div class="subregion-row hidden" id="subRegionRow">
+        <span class="subregion-label">시·군·구 / 기관 세부필터:</span>
+        <div class="subregion-chips" id="subRegionChips"></div>
+      </div>
+    </section>
+
+    <!-- Multi-dimensional Filter & Search Panel -->
+    <section class="panel-card filter-panel">
+      <div class="filter-row">
+        <span class="filter-label">기관 유형</span>
+        <div class="chip-group" id="orgTypeChips">
+          <button class="chip active" data-val="전체">전체 기관</button>
+          <button class="chip" data-val="광역지자체">광역지자체 (시·도청)</button>
+          <button class="chip" data-val="기초지자체">기초지자체 (시·군·구청)</button>
+          <button class="chip chip-council" data-val="의회전체">지방의회 전체 (도·시·군·구의회)</button>
+          <button class="chip" data-val="광역의회">광역의회 (시·도의회)</button>
+          <button class="chip" data-val="기초의회">기초의회 (시·군·구의회)</button>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">위원회 구분</span>
+        <div class="chip-group" id="categoryChips">
+          <button class="chip active" data-val="전체">전체 위원회</button>
+          <button class="chip" data-val="심의위원회">심의위원회 (민간위탁·건축·도시 등)</button>
+          <button class="chip" data-val="평가위원회">평가위원회 (제안서 평가위원 등)</button>
+          <button class="chip" data-val="자문위원회">자문위원회 (정책·전문자문)</button>
+          <button class="chip chip-council" data-val="의회위원">의회위원 (국외출장·연구단체·윤리·결산)</button>
+          <button class="chip" data-val="주민참여·협의체">주민참여·협의체·옴부즈만</button>
+          <button class="chip" data-val="인사·기타위원회">인사·고충·기타위원회</button>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">전문 분야</span>
+        <div class="chip-group" id="fieldChips">
+          <button class="chip active" data-val="전체">전 분야</button>
+          <button class="chip" data-val="행정·예산·위탁">행정·예산·회계·민간위탁</button>
+          <button class="chip" data-val="건축·도시·교통">건축·도시계획·경관·교통</button>
+          <button class="chip" data-val="복지·교육·청년">복지·보육·청년·50+·교육</button>
+          <button class="chip" data-val="일자리·경제·산업">일자리·경제·산업·기업</button>
+          <button class="chip" data-val="문화·관광·체육">문화·예술·관광·체육</button>
+          <button class="chip" data-val="환경·안전·기술">환경·상하수도·안전·기술</button>
+          <button class="chip" data-val="IT·정보화">IT·정보화·데이터·AI</button>
+        </div>
+      </div>
+
+      <div class="search-toolbar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="공고명, 지자체/의회명(예: 과천시, 연수구의회), 분야(예: 민간위탁, 제안서 평가위원, 결산검사) 검색..."
+          />
+          <button class="btn-clear hidden" id="btnClearSearch" title="검색어 지우기">✕</button>
+        </div>
+
+        <button class="btn btn-accent" id="btnLiveKeywordHarvest" title="입력한 검색어로 전국 지자체·의회 웹에서 즉시 추가 크롤링">
+          <span>🌐 입력 키워드로 전국 공고 실시간 원격수집</span>
+        </button>
+
+        <div class="toolbar-right">
+          <span class="active-only-pill" id="todayFilterBadge" title="당일 날짜 기준 마감기한이 지난 공고는 자동으로 제외됩니다">
+            ✅ 당일 기준 마감경과 공고 자동 제외
+          </span>
+          <select id="statusFilterSelect" class="select-box">
+            <option value="all">내 상태: 전체보기 (제외 건 숨김)</option>
+            <option value="bookmarked">⭐ 북마크한 공고만</option>
+            <option value="interested">👀 관심/검토중</option>
+            <option value="preparing">📝 지원준비중</option>
+            <option value="applied">✅ 지원완료</option>
+            <option value="ignored">🚫 제외/숨김한 공고</option>
+          </select>
+          <select id="sortSelect" class="select-box">
+            <option value="deadline">정렬: 마감 임박순</option>
+            <option value="latest">정렬: 최신 등록일순</option>
+            <option value="org">정렬: 기관명 가나다순</option>
+          </select>
+          <button class="btn-reset" id="btnResetFilters">필터 초기화</button>
+        </div>
+      </div>
+
+      <!-- Quick Watch Keywords Row -->
+      <div class="watch-keywords-row">
+        <span class="watch-label">⚡ 인기·추천 빠른 키워드:</span>
+        <div class="watch-tags" id="watchTags">
+          <button class="watch-tag" data-kw="수탁기관">수탁기관 선정심의</button>
+          <button class="watch-tag" data-kw="제안서">제안서 평가위원</button>
+          <button class="watch-tag" data-kw="민간위원">민간위원</button>
+          <button class="watch-tag" data-kw="공무국외출장">의회 공무국외출장</button>
+          <button class="watch-tag" data-kw="의원연구단체">의회 의원연구단체</button>
+          <button class="watch-tag" data-kw="결산검사">결산검사위원</button>
+          <button class="watch-tag" data-kw="주민참여예산">주민참여예산</button>
+          <button class="watch-tag" data-kw="도시계획">도시계획·건축</button>
+          <button class="watch-tag" data-kw="과천">과천시</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Header & Notice List -->
+    <section class="results-section">
+      <div class="results-bar">
+        <div class="results-count">
+          조건에 맞는 민간위원 모집 공고 <strong id="filteredCount">0</strong>건
+          <span class="active-filter-summary" id="activeFilterSummary"></span>
+        </div>
+      </div>
+
+      <div class="notice-list" id="noticeList">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Slide-over Detail Reader & Analyzer Drawer -->
+  <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
+  <aside class="detail-drawer hidden" id="detailDrawer">
+    <div class="drawer-header">
+      <div class="drawer-badges" id="drawerBadges"></div>
+      <button class="btn-close-drawer" id="btnCloseDrawer" title="닫기 (ESC)">✕</button>
+    </div>
+
+    <div class="drawer-body" id="drawerBody">
+      <h2 class="drawer-title" id="drawerTitle">공고 제목</h2>
+
+      <div class="drawer-action-row">
+        <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary" id="drawerOrigLink">
+          <span>🏛️ 지자체/의회 공고 원문 페이지 열기 ↗</span>
+        </a>
+        <button class="btn btn-outline" id="drawerBookmarkBtn">⭐ 북마크</button>
+        <select id="drawerStatusSelect" class="select-box">
+          <option value="none">지원상태 선택</option>
+          <option value="interested">👀 관심/검토중</option>
+          <option value="preparing">📝 지원준비중</option>
+          <option value="applied">✅ 지원완료</option>
+          <option value="ignored">🚫 관심없음(숨김)</option>
+        </select>
+      </div>
+
+      <!-- Structured Extracted Metadata Table -->
+      <div class="meta-grid-card">
+        <div class="meta-item">
+          <span class="meta-key">공고기관</span>
+          <span class="meta-val" id="dOrgName">-</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">고시/공고번호</span>
+          <span class="meta-val" id="dDocNo">-</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">등록일</span>
+          <span class="meta-val" id="dPubDate">-</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">모집기간 / 마감일</span>
+          <div class="meta-val-inline">
+            <span id="dPeriod">-</span>
+            <input type="date" id="dDeadlineInput" class="date-mini-input" title="마감일 직접 지정/수정" />
+          </div>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">모집인원</span>
+          <span class="meta-val" id="dQuota">-</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">접수방법 / 이메일</span>
+          <span class="meta-val" id="dApplyMethod">-</span>
+        </div>
+        <div class="meta-item full-width">
+          <span class="meta-key">담당부서 / 문의처</span>
+          <span class="meta-val" id="dContact">-</span>
+        </div>
+      </div>
+
+      <!-- Attachments Section -->
+      <div class="drawer-section" id="drawerAttachmentsSection">
+        <h3>📎 첨부파일 (공고문 · 지원신청서 · 개인정보동의서)</h3>
+        <ul class="attachment-list" id="dAttachments"></ul>
+      </div>
+
+      <!-- Personal Memo Section -->
+      <div class="drawer-section">
+        <h3>📝 나의 지원 메모 (자격요건 체크 · 제출서류 메모)</h3>
+        <div class="memo-box">
+          <textarea id="dUserMemo" rows="3" placeholder="예: 이메일(raining0@korea.kr)로 11/9 18시까지 재직증명서·지원서 제출 필요..."></textarea>
+          <button class="btn btn-secondary btn-sm" id="btnSaveMemo">메모 저장</button>
+        </div>
+      </div>
+
+      <!-- Full Extracted Text -->
+      <div class="drawer-section">
+        <div class="section-title-row">
+          <h3>📄 실시간 추출 공고 본문</h3>
+          <span class="loading-pill hidden" id="drawerLoadingPill">원문 페이지 실시간 분석 중...</span>
+        </div>
+        <pre class="notice-fulltext" id="dBodyText"></pre>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Manual URL Add Modal -->
+  <div class="modal-backdrop hidden" id="manualModalBackdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🔗 지자체·지방의회 공고 URL 직접 추가</h3>
+        <button class="btn-close-drawer" id="btnCloseManualModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          특정 시청·군청·구청·도의회·시의회·구의회의 고시/공고 상세 페이지 URL을 입력하면 본문, 모집기간, 첨부파일을 자동으로 분석해 통합 대시보드에 추가합니다.
+        </p>
+        <label class="form-label">공고 상세 URL (필수)</label>
+        <input
+          type="url"
+          id="manualUrlInput"
+          class="form-input"
+          placeholder="https://www.gccity.go.kr/portal/saeol/gosi/view.do?notAncmtMgtNo=33007&mId=0301040000"
+        />
+        <label class="form-label">공고 제목 (선택 - 비워두면 자동 추출)</label>
+        <input
+          type="text"
+          id="manualTitleInput"
+          class="form-input"
+          placeholder="예: 과천일자리센터 수탁기관 선정심의위원회 위원 공개 모집 공고"
+        />
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCancelManual">취소</button>
+        <button class="btn btn-primary" id="btnSubmitManual">자동 분석 및 등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast hidden" id="toastBox"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
