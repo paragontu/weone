@@ -52,7 +52,7 @@
     "userStatus": "none",
     "userMemo": "",
     "createdAt": "2026-11-22T20:51:07.134Z",
-    "updatedAt": "2026-11-26T13:26:27.862Z"
+    "updatedAt": "2026-11-26T17:15:19.365Z"
   },
   {
     "id": "nt_h8w4nd_Z2NjaXR5LmdvLm",
@@ -102,7 +102,7 @@
     "userStatus": "none",
     "userMemo": "",
     "createdAt": "2026-11-20T01:10:33.189Z",
-    "updatedAt": "2026-11-26T05:16:01.691Z"
+    "updatedAt": "2026-11-26T17:15:19.365Z"
   },
   {
     "id": "nt_u06gwf_a2hzLmdvLmtyL2",
@@ -428,34 +428,6 @@
     "userMemo": "",
     "createdAt": "2026-11-13T13:12:31.064Z",
     "updatedAt": "2026-11-26T09:14:29.936Z"
-  },
-  {
-    "id": "nt_wysscs_c3VuY2hlb24uZ2",
-    "url": "https://www.suncheon.go.kr/kr/news/0004/0005/0001/?mode=view&seq=64220",
-    "title": "「순천시 민원콜센터 운영 용역」제안서 평가위원(후보자) 모집 공고",
-    "snippet": "1. 모집(공고)기간 : 2026. 11. 10.(화) ~ 11. 26.(목) 18:00까지<16일간> 2. 모집분야 : 3개분야(전문분야, 시민단체 추천, 학계·공무원) 3. 모집인원 : 27명 이상(공개모집 평가위원수의 3배수) 4. 접수방법 : 공문 또는 담당자 이메일 접수(현장접수 및 팩스 등 불가) ※ 제출서류 등 자세한 사항은 붙임 공고문 참조 붙임 제안서 평가위원 공고문 1부. 끝.",
-    "region": "전남",
-    "subRegion": "순천시",
-    "orgName": "순천시청",
-    "orgType": "기초지자체",
-    "category": "평가위원회",
-    "fields": [
-      "행정·예산·위탁"
-    ],
-    "publishedDate": "2026-11-10",
-    "deadline": "2026-11-26",
-    "periodText": "2026. 11. 10.(화) ~ 11. 26.(목) 18:00",
-    "quota": "27명 이상(공개모집 평가위원수의 3배수",
-    "applyMethod": "공문 또는 담당자 이메일 접수(현장접수 및 팩스 등 불가) ※ 제출서류 등",
-    "contact": "",
-    "docNo": "",
-    "sourceType": "지자체 고시/공고",
-    "collectedAt": "2026-11-10T08:58:23.843Z",
-    "bookmarked": false,
-    "userStatus": "none",
-    "userMemo": "",
-    "createdAt": "2026-11-10T08:59:00.561Z",
-    "updatedAt": "2026-11-11T17:00:16.346Z"
   },
   {
     "id": "nt_svq1xs_bnRvay5nby5rci",
